@@ -1,0 +1,18 @@
+# Python ẩn/cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+# Thư mục chứa cơ sở dữ liệu Vector (Bắt buộc phải bỏ qua vì nó rất nặng và tự sinh)
+legal_vector_db/
+# Thư mục chứa file dữ liệu Word/PDF gốc (Nếu bạn không muốn public luật lên mạng)
+docs/
+# Các file ẩn, file tạm của hệ điều hành và Microsoft Word
+.DS_Store
+Thumbs.db
+~$*.docx
+~$*.doc
+# Ẩn môi trường ảo Python
+algvenv/
+.env
