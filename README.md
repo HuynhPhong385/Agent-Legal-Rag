@@ -29,7 +29,6 @@ AGENTIC LEGAL RAG/
 ├── setup.py            # File cấu hình đóng gói dự án ở chế độ Editable
 ├── app_rag.py          # Ứng dụng chạy chatbot trên Terminal
 └── app_web.py          # Ứng dụng chạy giao diện Chatbot trên trình duyệt Web
-```
 # Hướng Dẫn Cài Đặt Và Sử Dụng
 1. Cài đặt môi trường và thư viện
 # Cài đặt toàn bộ các thư viện cần thiết (langchain, chroma, streamlit,...)
