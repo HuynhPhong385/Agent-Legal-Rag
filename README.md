@@ -29,28 +29,26 @@ AGENTIC LEGAL RAG/
 ├── setup.py            # File cấu hình đóng gói dự án ở chế độ Editable
 ├── app_rag.py          # Ứng dụng chạy chatbot trên Terminal
 └── app_web.py          # Ứng dụng chạy giao diện Chatbot trên trình duyệt Web
+```
 # Hướng Dẫn Cài Đặt Và Sử Dụng
+```
 1. Cài đặt môi trường và thư viện
 # Cài đặt toàn bộ các thư viện cần thiết (langchain, chroma, streamlit,...)
 pip install -r requirements.txt
-
 ## Cài đặt dự án dưới dạng Local Package (Editable Mode) để nhận diện gói src/
 pip install -e .
+
 2. Cấu hình khóa bảo mật API
 Tạo một file tên là .env nằm ngay tại thư mục gốc của dự án (file này đã được chặn trong .gitignore để đảm bảo không bị lộ lên GitHub). Điền mã khóa Gemini API của bạn vào:
-
-Đoạn mã
 GOOGLE_API_KEY=mã_api_key_gemini_của_bạn_ở_đây
+
 3. Nạp dữ liệu văn bản pháp lý (Ingestion)
 Đặt toàn bộ các file luật bằng Word (.docx) mà bạn có vào bên trong thư mục docs/. Nếu có dữ liệu cũ, hãy tiến hành xóa thư mục legal_vector_db trước, sau đó chạy lệnh nạp dữ liệu:
-
-Bash
 python scripts/ingest_data.py
 Hệ thống sẽ tiến hành đọc dữ liệu, băm nhỏ theo ngữ nghĩa (Semantic Chunking), tạo cơ sở dữ liệu Vector trên ChromaDB và lưu trữ chỉ mục từ khóa BM25 dưới dạng file .pkl.
 
 4. Khởi động ứng dụng Chatbot
 ## Lựa chọn 1: Chạy trên giao diện Terminal
 python app_rag.py
-
 ## Lựa chọn 2: Chạy giao diện Web UI trực quan
 python -m streamlit run app_web.py
