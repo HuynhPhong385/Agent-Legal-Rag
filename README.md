@@ -30,12 +30,12 @@ AGENTIC LEGAL RAG/
 ├── app_rag.py          # Ứng dụng chạy chatbot trên Terminal
 └── app_web.py          # Ứng dụng chạy giao diện Chatbot trên trình duyệt Web
 ```
-## Hướng Dẫn Cài Đặt Và Sử Dụng
+# Hướng Dẫn Cài Đặt Và Sử Dụng
 1. Cài đặt môi trường và thư viện
 # Cài đặt toàn bộ các thư viện cần thiết (langchain, chroma, streamlit,...)
 pip install -r requirements.txt
 
-# Cài đặt dự án dưới dạng Local Package (Editable Mode) để nhận diện gói src/
+## Cài đặt dự án dưới dạng Local Package (Editable Mode) để nhận diện gói src/
 pip install -e .
 2. Cấu hình khóa bảo mật API
 Tạo một file tên là .env nằm ngay tại thư mục gốc của dự án (file này đã được chặn trong .gitignore để đảm bảo không bị lộ lên GitHub). Điền mã khóa Gemini API của bạn vào:
@@ -50,8 +50,8 @@ python scripts/ingest_data.py
 Hệ thống sẽ tiến hành đọc dữ liệu, băm nhỏ theo ngữ nghĩa (Semantic Chunking), tạo cơ sở dữ liệu Vector trên ChromaDB và lưu trữ chỉ mục từ khóa BM25 dưới dạng file .pkl.
 
 4. Khởi động ứng dụng Chatbot
-# Lựa chọn 1: Chạy trên giao diện Terminal
+## Lựa chọn 1: Chạy trên giao diện Terminal
 python app_rag.py
 
-# Lựa chọn 2: Chạy giao diện Web UI trực quan
+## Lựa chọn 2: Chạy giao diện Web UI trực quan
 python -m streamlit run app_web.py
