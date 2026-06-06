@@ -1,7 +1,10 @@
 import os
-from config import embeddings, PERSIST_DIRECTORY
-from data_utils import load_all_legal_docs
+import sys
+import pickle
+from src.config import embeddings, PERSIST_DIRECTORY
+from src.data_utils import load_all_legal_docs
 from langchain_chroma import Chroma
+from src.config import BM25_INDEX_PATH
 
 # Định nghĩa cấu hình đường dẫn 4 file luật (đã chia nhỏ phần 1 & phần 2)
 DANH_SACH_FILE_LUAT = {
@@ -16,7 +19,7 @@ def main():
     print("=== BẮT ĐẦU PIPELINE XỬ LÝ VÀ NẠP DỮ LIỆU ===")
     
     # 1. Đọc và bóc tách các file điều luật
-    kho_du_lieu_phap_ly = load_all_legal_docs(DANH_SACH_FILE_LUAT)
+    kho_du_lieu_phap_ly = load_all_legal_docs(DANH_SACH_FILE_LUAT, embeddings)
     print(f"\n Tổng số điều luật thu được để nhúng: {len(kho_du_lieu_phap_ly)}")
     
     if len(kho_du_lieu_phap_ly) == 0:
@@ -32,7 +35,11 @@ def main():
         embedding=embeddings,
         persist_directory=PERSIST_DIRECTORY
     )
-    
+    print("⚡ Đang khởi tạo và đóng gói bộ chỉ mục từ khóa BM25...")
+    # legal_documents là danh sách các mãnh Chunks (Document) bạn vừa băm ra
+    with open(BM25_INDEX_PATH, "wb") as f:
+        pickle.dump(kho_du_lieu_phap_ly, f)
+    print(f"💾 Đã lưu thành công chỉ mục BM25 tại:  {BM25_INDEX_PATH}")
     print("✅ TIẾN TRÌNH HOÀN THÀNH MỸ MÃN!")
     
     # # 3. Kiểm tra nhanh thử nghiệm tìm kiếm

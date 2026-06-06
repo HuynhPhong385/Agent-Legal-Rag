@@ -1,5 +1,5 @@
 # --- FILE check_nghi_dinh.py ---
-from config import embeddings, PERSIST_DIRECTORY
+from src.config import embeddings, PERSIST_DIRECTORY
 from langchain_chroma import Chroma
 
 vector_db = Chroma(persist_directory=PERSIST_DIRECTORY, embedding_function=embeddings)

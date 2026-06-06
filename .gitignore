@@ -1,18 +1,26 @@
-# Python ẩn/cache
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-# Thư mục chứa cơ sở dữ liệu Vector (Bắt buộc phải bỏ qua vì nó rất nặng và tự sinh)
-legal_vector_db/
-# Thư mục chứa file dữ liệu Word/PDF gốc (Nếu bạn không muốn public luật lên mạng)
-docs/
-# Các file ẩn, file tạm của hệ điều hành và Microsoft Word
-.DS_Store
-Thumbs.db
-~$*.docx
-~$*.doc
-# Ẩn môi trường ảo Python
+# 1. Môi trường ảo (Virtual Environment) - Cực kỳ nặng, không bao giờ đẩy lên Git
 algvenv/
+venv/
+ENV/
+
+# 2. Bảo mật - Chứa Gemini API Key của bạn (Tuyệt đối không để lộ!)
 .env
+
+# 3. Cơ sở dữ liệu và Chỉ mục (Database & Index) - Chỉ sinh ra khi chạy local
+legal_vector_db/
+data/vector_db/
+data/bm25_index.pkl
+
+# 4. Các file Word tạm thời do MS Word sinh ra khi đang mở file (Lock files)
+docs/~$*.docx
+docs/~$*.doc
+~$*.docx
+
+# 5. Các file cache của Python (Sinh ra khi bạn chạy code)
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# 6. Metadata cấu hình cục bộ của công cụ đóng gói (Editable mode)
+*.egg-info/
+.eggs/
