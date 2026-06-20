@@ -6,7 +6,6 @@ from langchain_huggingface import HuggingFaceEmbeddings
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv()
-print(" Đang tải mô hình nhúng local từ HuggingFace (Miễn phí)...")
 
 embeddings = HuggingFaceEmbeddings(
         model_name="bkai-foundation-models/vietnamese-bi-encoder"

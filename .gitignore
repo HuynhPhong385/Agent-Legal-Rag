@@ -1,12 +1,9 @@
-# 1. Môi trường ảo (Virtual Environment) - Cực kỳ nặng, không bao giờ đẩy lên Git
-algvenv/
-venv/
-ENV/
 
-# 2. Bảo mật - Chứa Gemini API Key của bạn (Tuyệt đối không để lộ!)
+algvenv/
+
 .env
 
-# 3. Cơ sở dữ liệu và Chỉ mục (Database & Index) - Chỉ sinh ra khi chạy local
+
 legal_vector_db/
 data/vector_db/
 data/bm25_index.pkl
@@ -17,9 +14,11 @@ docs/~$*.doc
 ~$*.docx
 
 # 5. Các file cache của Python (Sinh ra khi bạn chạy code)
-**/__pycache__/
-*.py[cod]
-*$py.class
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
 
 # 6. Metadata cấu hình cục bộ của công cụ đóng gói (Editable mode)
 *.egg-info/
