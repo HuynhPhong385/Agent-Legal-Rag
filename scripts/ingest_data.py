@@ -4,8 +4,10 @@ import pickle
 from src.config import embeddings, PERSIST_DIRECTORY
 from src.data_utils import load_all_legal_docs
 from langchain_chroma import Chroma
+from langchain_neo4j import Neo4jGraph
 from src.config import BM25_INDEX_PATH
-
+from dotenv import load_dotenv
+load_dotenv()
 # Định nghĩa cấu hình đường dẫn 4 file luật (đã chia nhỏ phần 1 & phần 2)
 DANH_SACH_FILE_LUAT = {
     "Luật Đường bộ": "docs\luật đường bộ.docx",
@@ -15,40 +17,63 @@ DANH_SACH_FILE_LUAT = {
     "Nghị định xử phạt": "docs\_Nghị định xử phạt.docx"
 }
 
+graph = Neo4jGraph(
+    url=os.getenv("NEO4J_URI"),
+    username=os.getenv("NEO4J_USERNAME"),
+    password=os.getenv("NEO4J_PASSWORD")
+)
 def main():
-    print("=== BẮT ĐẦU PIPELINE XỬ LÝ VÀ NẠP DỮ LIỆU ===")
-    
+    embedding_model = embeddings
     # 1. Đọc và bóc tách các file điều luật
-    kho_du_lieu_phap_ly = load_all_legal_docs(DANH_SACH_FILE_LUAT, embeddings)
-    print(f"\n Tổng số điều luật thu được để nhúng: {len(kho_du_lieu_phap_ly)}")
+    all_chunks = load_all_legal_docs(DANH_SACH_FILE_LUAT, embedding_model)
+    print(f"\n Tổng số điều luật thu được: {len(all_chunks)}")
     
-    if len(kho_du_lieu_phap_ly) == 0:
-        print("❌ Không có dữ liệu để nạp. Hãy kiểm tra lại đường dẫn file Word.")
+    if len(all_chunks) == 0:
+        print("Không có dữ liệu. Hãy kiểm tra lại đường dẫn file Word.")
         return
 
-    # 2. Tạo Vector DB với Gemini Embeddings và lưu trữ cứng vào thư mục local
-    print(f"\n🔄 Đang gửi dữ liệu sang Google AI Studio để nhúng vector...")
-    print(f"📦 Đang lưu trữ dữ liệu vào Chroma DB tại: {PERSIST_DIRECTORY}...")
-    
-    vector_db = Chroma.from_documents(
-        documents=kho_du_lieu_phap_ly,
-        embedding=embeddings,
-        persist_directory=PERSIST_DIRECTORY
-    )
-    print("⚡ Đang khởi tạo và đóng gói bộ chỉ mục từ khóa BM25...")
-    # legal_documents là danh sách các mãnh Chunks (Document) bạn vừa băm ra
-    with open(BM25_INDEX_PATH, "wb") as f:
-        pickle.dump(kho_du_lieu_phap_ly, f)
-    print(f"💾 Đã lưu thành công chỉ mục BM25 tại:  {BM25_INDEX_PATH}")
-    print("✅ TIẾN TRÌNH HOÀN THÀNH MỸ MÃN!")
-    
-    # # 3. Kiểm tra nhanh thử nghiệm tìm kiếm
-    # print("\n🔍 Thử nghiệm tìm kiếm nhanh với cơ sở dữ liệu mới:")
-    # test_query = "Xử phạt nồng độ cồn xe máy"
-    # results = vector_db.similarity_search(test_query, k=1)
-    # if results:
-    #     print(f" -> Kết quả tìm thấy phù hợp nhất thuộc: {results[0].metadata['source']}")
-    #     print(f" -> Chi tiết: {results[0].metadata['dieu']}")
+    for index, chunk in enumerate(all_chunks):
+        # Trích xuất nội dung và metadata từ đối tượng Document của LangChain
+        content_text = chunk.page_content
+        metadata = chunk.metadata if hasattr(chunk, 'metadata') else {}
+        
+        # Lấy thông tin nguồn và chương dựa trên logic bạn đã xử lý trước đó
+        doc_name = metadata.get("source", "Unknown_Doc")
+        current_chuong = metadata.get("chuong", "Tổng quan")
+        
+        # Câu lệnh Cypher ánh xạ cấu trúc phân tầng
+        cypher_query = """
+        // a. Tạo hoặc nhận diện Node Văn bản gốc
+        MERGE (doc:LegalDocument {name: $doc_name})
+        
+        // b. Tạo hoặc nhận diện Node Chương thuộc văn bản đó
+        MERGE (ch:Chapter {name: $chapter_name, doc_source: $doc_name})
+        MERGE (ch)-[:BELONGS_TO]->(doc)
+        
+        // c. Tạo Node cho từng mảnh ngữ nghĩa cụ thể (Chunk)
+        CREATE (chunk:DocumentChunk {
+            id: $chunk_id,
+            content: $content,
+            global_index: $global_index
+        })
+        
+        // d. Thiết lập liên kết cứng giữa mảnh và Chương/Văn bản
+        CREATE (chunk)-[:PART_OF_CHAPTER]->(ch)
+        CREATE (chunk)-[:PART_OF_DOC]->(doc)
+        """
+        
+        params = {
+            "doc_name": doc_name,
+            "chapter_name": current_chuong,
+            "chunk_id": f"chunk_global_{index}",
+            "content": content_text,
+            "global_index": index
+        }
+        
+        # Thực thi đẩy lên Cloud
+        graph.query(cypher_query, params)
+        
+    print("\n✅ Hoàn thành! Toàn bộ cấu trúc Đồ thị pháp lý đã sẵn sàng trên Neo4j AuraDB.")
 
 if __name__ == "__main__":
     main()
