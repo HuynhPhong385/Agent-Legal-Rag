@@ -1,13 +1,26 @@
-# Trợ Lý Luật Sư - Giao Thông Việt Nam (Agentic Legal RAG)
+# GraphRAG Luật Giao Thông — Hệ Thống Tra Cứu Pháp Luật Thông Minh
 
-Hệ thống Trợ lý thông minh hỗ trợ tra cứu và tư vấn pháp luật về Giao thông Đường bộ Việt Nam. Dự án áp dụng kiến trúc **Hybrid Search RAG (Dense + Sparse)** tiên tiến kết hợp với kỹ thuật Prompt phản biện chuyên sâu, giúp trích xuất chính xác các quy định từ Luật Đường bộ 2024, Luật Trật tự an toàn giao thông đường bộ 2024 và Nghị định 100/2019/NĐ-CP mà không bị hiện tượng ảo giác (Hallucination) của LLM.
+Hệ thống Trợ lý thông minh hỗ trợ tra cứu và tư vấn pháp luật về Giao thông Đường bộ Việt Nam. Dự án áp dụng kiến trúc **Advanced Hybrid GraphRAG (Knowledge Graph + Vector Store)** tiên tiến, kết hợp chặt chẽ giữa đồ thị tri thức và tìm kiếm ngữ nghĩa nhằm bảo toàn trọn vẹn mạch ngữ cảnh phân cấp cấu trúc luật (Chương/Điều/Khoản), khắc phục triệt để hiện tượng ảo giác (Hallucination) của các mô hình ngôn ngữ lớn (LLM).
+
+---
+
+## Tại Sao Lại Là GraphRAG Đối Với Dữ Liệu Luật?
+
+Văn bản pháp luật Việt Nam có cấu trúc phân cấp và mối liên đới cực kỳ chặt chẽ (Khoản phải đi liền với Điều, Điều phải nằm trong Chương và áp dụng cho từng đối tượng phương tiện cụ thể). Cách tiếp cận RAG truyền thống (chỉ dùng Vector Search) thường bẻ vụn văn bản thành các mảnh rời rạc, khiến LLM dễ trích xuất sai mức phạt hoặc áp dụng nhầm loại phương tiện (như nhầm giữa xe máy thông thường và xe máy chuyên dùng).
+
+Hệ thống này giải quyết bài toán bằng cơ chế **Hybrid Retrieval Core**:
+1. **Dense Retrieval (ChromaDB):** Định vị nhanh các vùng văn bản có phân phối ngữ nghĩa gần nhất với câu hỏi người dùng dựa trên Vector Embeddings.
+2. **Graph Retrieval (Neo4j):** Từ các điểm neo tìm được, hệ thống truy quét đồ thị tri thức để khôi phục trọn vẹn mối quan hệ thực thể, bốc thêm tiêu đề của Điều, Chương và tích hợp ngữ cảnh chính xác nhất trước khi gửi vào LLM sinh câu trả lời.
+
+---
 
 ## Tính Năng Nổi Bật
 
-- **Lõi tìm kiếm lai (Hybrid Retrieval Core)**: Kết hợp hài hòa giữa tìm kiếm ngữ nghĩa theo Vector (`ChromaDB` + Embeddings) và tìm kiếm từ khóa chính xác (`BM25`). Cơ chế này đảm bảo hệ thống vừa hiểu được ý định người dùng, vừa bốc đúng từ ngữ chuyên ngành trong các văn bản luật.
-- **Cấu trúc chuẩn Doanh nghiệp (Production-ready)**: Mã nguồn được bao gói module hóa rõ ràng, phân tách biệt lập giữa logic cốt lõi hệ thống (`src/`), dữ liệu lưu trữ (`data/`, `docs/`) và các kịch bản thực thi (`scripts/`).
-- **Prompt kỹ thuật cao (Few-Shot & Chain-of-Thought)**: Hệ thống được cài đặt các ví dụ mẫu phản biện để hướng dẫn mô hình tư duy từng bước độc lập, khắc phục triệt để các lỗi nhận nhầm hoặc râu ông nọ cắm cằm bà kia (ví dụ: phân biệt rõ ràng quy định giữa "xe máy thông thường" và "xe máy chuyên dùng").
-- **Giao diện Web Chatbot mượt mà**: Tích hợp giao diện UI trực quan bằng **Streamlit**, mang lại trải nghiệm hỏi đáp pháp lý thân thiện, có lưu giữ lịch sử cuộc trò chuyện (Session State).
+* **Kiến trúc Tìm kiếm Lai (Hybrid Graph-Vector Retrieval):** Sự kết hợp hài hòa giữa `ChromaDB` (Tìm kiếm ngữ nghĩa) và `Neo4j` (Khôi phục mạch phân cấp cấu trúc luật). Đảm bảo hệ thống vừa hiểu được ý định người dùng, vừa trích xuất thông tin có tính hệ thống cao.
+* **Tối ưu hóa Truy vấn (Query Rewriting / Transformation):** Sử dụng LLM (Gemini 2.5 Flash) đóng vai trò lớp đệm, tự động biên dịch câu hỏi khẩu ngữ, dân dã của người dùng (Ví dụ: *"vượt đèn đỏ"*, *"uống rượu bia"*) thành các thuật ngữ pháp lý quy chuẩn (Ví dụ: *"không chấp hành hiệu lệnh của đèn tín hiệu giao thông"*) trước khi thực hiện tìm kiếm.
+* **Cấu trúc Mô-đun chuẩn Doanh nghiệp (Production-ready):** Mã nguồn được tổ chức sạch sẽ, tường minh. Tách biệt hoàn toàn phần giao diện người dùng UI (`app_web.py`), luồng thực thi RAG cốt lõi (`app_rag.py`), và các mô-đun xử lý chuyên biệt (`src/`) như `generator.py`, `retriever.py`, `data_utils.py`.
+* **Prompt Kỹ thuật cao (Context-Grounded & Chain-of-Thought):** Hệ thống áp dụng kỹ thuật Prompt phản biện kết hợp kiểm soát dữ liệu đầu vào nghiêm ngặt, ép mô hình chỉ tư vấn dựa trên ngữ cảnh thực tế bốc từ đồ thị lên, tránh việc mô hình tự bịa đặt mức phạt hoặc trích dẫn sai điều khoản.
+* **Giao diện Trực quan & Bộ lọc Động (Dynamic Filtering):** Tích hợp giao diện Streamlit phẳng hiện đại với Sidebar cho phép người dùng tùy chỉnh thu hẹp hoặc mở rộng phạm vi tra cứu theo từng văn bản cụ thể, lọc nâng cao theo loại phương tiện hoặc hành vi vi phạm thời gian thực.
 
 ---
 ![Giao diện ứng dụng]
